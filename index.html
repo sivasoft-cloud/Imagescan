@@ -1,0 +1,69 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    
+    <style>
+      /* Creates a simple "Tap to unmute" button that disappears once tapped */
+      #unmute-button {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        padding: 12px 24px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: 2px solid white;
+        border-radius: 8px;
+        font-family: sans-serif;
+        font-size: 16px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  
+  <body>
+    <button id="unmute-button">Tap anywhere to unmute</button>
+
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      
+      <a-assets>
+        <video id="vid" src="./video.mp4" preload="auto" response-type="arraybuffer" loop crossorigin webkit-playsinline playsinline muted></video>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-video src="#vid" position="0 0 0" width="1" height="1.5" rotation="0 0 0"></a-video>
+      </a-entity>
+      
+    </a-scene>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const target = document.querySelector('[mindar-image-target="targetIndex: 0"]');
+        const video = document.querySelector('#vid');
+        const unmuteBtn = document.querySelector('#unmute-button');
+        
+        // Play video when the photo is framed in the camera
+        target.addEventListener("targetFound", event => {
+          video.play();
+        });
+        
+        // Pause video if the user looks away from the photo
+        target.addEventListener("targetLost", event => {
+          video.pause();
+        });
+        
+        // Unmute logic for mobile browsers
+        document.body.addEventListener('click', () => {
+          video.muted = false;
+          unmuteBtn.style.display = 'none'; // Hide the button after tapping
+        });
+      });
+    </script>
+  </body>
+</html>
